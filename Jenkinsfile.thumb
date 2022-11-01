@@ -1,0 +1,121 @@
+pipeline {
+    agent any
+    environment {
+        REPO_CREDENTIALS = credentials('a31843c7-9aa6-4723-95ff-87a1feb934a1')
+        TAG = "1.1.${BUILD_NUMBER}"
+    }
+    tools {
+        maven 'Maven 3.6.2'
+        jdk 'JDK 8'
+    }
+    stages {
+        stage('Initialize') {
+            steps {
+                script {
+                    sh '''
+                    echo "PATH = ${PATH}"
+                    echo "M2_HOME = ${M2_HOME}"
+                    mvn validate
+                    mvn initialize
+                    mvn generate-sources
+                    mvn process-sources
+                    mvn generate-resources
+                    mvn process-resources
+                    '''
+                }
+                echo 'Maven CI job has been initialized.'
+            }
+        }
+        stage('Compile') {
+            steps {
+                script {
+                    sh 'mvn compile'
+                    sh 'mvn process-classes'
+                } 
+            }
+        }
+        stage('Tests') {
+            steps {
+                script {
+                    sh '''
+                    mvn generate-test-sources
+                    mvn process-test-sources
+                    mvn generate-test-resources
+                    mvn process-test-resources	
+                    mvn test-compile
+                    mvn process-test-classes
+                    mvn test
+                    '''
+                } 
+            }
+        }
+        stage('Package') {
+            steps {
+                script {
+                    configFileProvider([configFile(fileId: 'fc3e184d-fd76-4262-a1e7-9a5671ebd340', variable: 'MAVEN_SETTINGS_XML')]) {
+                        sh '''
+                        mvn prepare-package
+                        mvn clean package
+                        '''
+                    }
+                }
+            }
+        }
+        stage('Building Docker Image and Pushing to ECR') {
+            steps {
+                script {
+                    // docker.withRegistry('644435390668.dkr.ecr.eu-central-1.amazonaws.com/', 'aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 644435390668.dkr.ecr.eu-central-1.amazonaws.com') {
+                    //     docker.image("adam-thumbnailer:${TAG}").push()
+                    //     docker.image("adam-thumbnailer:${TAG}").push("latest")
+                    sh'''
+                    aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 644435390668.dkr.ecr.eu-central-1.amazonaws.com
+                    docker build -t adam-thumbnailer:${TAG} .
+                    docker tag adam-thumbnailer:${TAG} 644435390668.dkr.ecr.eu-central-1.amazonaws.com/adam-thumbnailer:${TAG}
+                    docker push 644435390668.dkr.ecr.eu-central-1.amazonaws.com/adam-thumbnailer:${TAG}
+                    docker tag adam-thumbnailer:${TAG} 644435390668.dkr.ecr.eu-central-1.amazonaws.com/adam-thumbnailer:latest
+                    docker push 644435390668.dkr.ecr.eu-central-1.amazonaws.com/adam-thumbnailer:latest
+                    '''
+                }
+            }
+        }
+        stage('E2E Tests') {
+            steps {
+                script {        
+                    sh'''
+                    mvn pre-integration-test
+                    mvn integration-test
+                    mvn post-integration-test
+                    '''
+                } 
+            }
+        }    
+        stage('Build') {
+            steps {
+                sh 'mvn verify'
+                // sh 'mvn -U --batch-mode -Dmaven.test.failure.ignore=true install'
+                configFileProvider([configFile(fileId: 'fc3e184d-fd76-4262-a1e7-9a5671ebd340', variable: 'MAVEN_SETTINGS_XML')]) {
+                    sh 'mvn versions:set versions:commit -DnewVersion="1.0" -U --batch-mode -Dmaven.test.failure.ignore=true -s $MAVEN_SETTINGS_XML install'
+                }
+                echo 'Build stage has been completed.'
+            }
+            post {
+                success {
+                    archiveArtifacts 'target/*.jar'
+                }
+            }
+        }
+        // stage('Deploy') {
+        //     steps {
+        //         configFileProvider([configFile(fileId: 'fc3e184d-fd76-4262-a1e7-9a5671ebd340', variable: 'MAVEN_SETTINGS_XML')]) {
+        //             sh 'mvn --settings $MAVEN_SETTINGS_XML deploy --settings $MAVEN_SETTINGS_XML'
+        //         }
+        //     }
+        //     post {
+        //         success {
+        //             archiveArtifacts 'target/*.jar'
+        //         }
+        //     }
+        // }
+    }        
+}
+
