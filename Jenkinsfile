@@ -36,7 +36,16 @@ pipeline {
                         echo "pomXml: $pomXml"
                         nextVersion = pomXml.version
                         echo "${nextVersion}"
-                        sh "git tag -a '${nextVersion}' -m '${nextVersion}'" 
+                        // sh "git tag -a '${nextVersion}' -m '${nextVersion}'" 
+                                sh '''
+                        TAG_NAME="${nextVersion}"
+                        if git tag -l $TAG_NAME > /dev/null 2>&1; then
+                            echo "Tag $TAG_NAME already exists"
+                        else
+                            echo "Creating tag $TAG_NAME"
+                            git tag $TAG_NAME
+                        fi
+                        '''
                     }
                 }
             }
