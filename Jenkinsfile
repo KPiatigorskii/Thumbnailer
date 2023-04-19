@@ -18,6 +18,7 @@ pipeline {
                 dir("app"){
 
                 withMaven{
+                    sh 'mvn install'
                     sh "mvn install"
                 }
                 }
