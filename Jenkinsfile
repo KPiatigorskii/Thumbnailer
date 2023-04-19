@@ -25,7 +25,7 @@ pipeline {
                         }
                         sh 'mvn package'
                         sh "mvn install"
-                        sh "mvn org.codehaus.mojo:versions-maven-plugin:2.8.1:display-version -q -DforceStdout -m 'Tagging release `mvn org.codehaus.mojo:versions-maven-plugin:2.8.1:display-version -q -DforceStdout`"
+                        //sh "mvn org.codehaus.mojo:versions-maven-plugin:2.8.1:display-version -q -DforceStdout -m 'Tagging release `mvn org.codehaus.mojo:versions-maven-plugin:2.8.1:display-version -q -DforceStdout`"
                         // sh "git tag -a 'successful build' && git push --tags"
 
                     }
