@@ -42,11 +42,15 @@ pipeline {
             }
         }
         stage('test'){
-            sh "mvn test"
-            junit 'target/surefire-reports/*.xml'
+            steps{
+                sh "mvn test"
+                junit 'target/surefire-reports/*.xml'
+            }
         }
         stage('archive'){
-            archiveArtifacts 'target/*.jar'
+            steps{
+                archiveArtifacts 'target/*.jar'
+            }
         }
     }
     post {
