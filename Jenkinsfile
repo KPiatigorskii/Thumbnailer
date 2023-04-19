@@ -24,12 +24,19 @@ pipeline {
                         // sh "git tag -a 'successful build' && git push --tags"
 
                     }
-                        script{
-                            def pomXml = readMavenPom file: 'pom.xml'
-                            echo "pomXml: $pomXml"
-                            nextVersion = pomXml.version
-                            echo "${nextVersion}"
-                        }
+
+                }
+            }
+        }
+        stage('Add tag'){
+            steps{
+                script{
+                    def pomXml = readMavenPom file: 'pom.xml'
+                    echo "pomXml: $pomXml"
+                    nextVersion = pomXml.version
+                    echo "${nextVersion}"
+                    sh "git tag -a '${nextVersion}' -m '${nextVersion}'" 
+                    sh 'git push --tags'
                 }
             }
         }
