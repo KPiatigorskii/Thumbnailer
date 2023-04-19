@@ -52,13 +52,18 @@ pipeline {
         }
         stage('test'){
             steps{
-                sh "mvn test"
-                junit 'target/surefire-reports/*.xml'
+                
+                dir("app"){
+                    sh "mvn test"
+                    junit 'target/surefire-reports/*.xml'
+                }
             }
         }
         stage('archive'){
             steps{
-                archiveArtifacts 'target/*.jar'
+                dir("app"){
+                    archiveArtifacts 'target/*.jar'
+                }
             }
         }
     }
