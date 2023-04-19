@@ -64,18 +64,19 @@ pipeline {
         stage('Building Docker Image and Pushing to ECR') {
             steps {
                 script {
-                    // docker.withRegistry('644435390668.dkr.ecr.eu-central-1.amazonaws.com/', 'aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 644435390668.dkr.ecr.eu-central-1.amazonaws.com') {
-                    //     docker.image("adam-thumbnailer:${TAG}").push()
-                    //     docker.image("adam-thumbnailer:${TAG}").push("latest")
+                    // docker.withRegistry('644435390668.dkr.ecr.eu-central-1.amazonaws.com/', 'aws ecr get-login-password --region eu-central-1 | docker login --username BATELAWS --password-stdin 644435390668.dkr.ecr.eu-central-1.amazonaws.com') {
+                    //     docker.image("batel-image_compressor:${TAG}").push()
+                    //     docker.image("batel-image_compressor:${TAG}").push("latest")
                     sh'''
                     aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 644435390668.dkr.ecr.eu-central-1.amazonaws.com
-                    docker build -t adam-thumbnailer:${TAG} .
-                    docker tag adam-thumbnailer:${TAG} 644435390668.dkr.ecr.eu-central-1.amazonaws.com/adam-thumbnailer:${TAG}
-                    docker push 644435390668.dkr.ecr.eu-central-1.amazonaws.com/adam-thumbnailer:${TAG}
-                    docker tag adam-thumbnailer:${TAG} 644435390668.dkr.ecr.eu-central-1.amazonaws.com/adam-thumbnailer:latest
-                    docker push 644435390668.dkr.ecr.eu-central-1.amazonaws.com/adam-thumbnailer:latest
+                    docker build -t batel-image_compressor:${TAG} .
+                    docker tag batel-image_compressor:${TAG} 644435390668.dkr.ecr.eu-central-1.amazonaws.com/batel-image_compressor:${TAG}
+                    docker push 644435390668.dkr.ecr.eu-central-1.amazonaws.com/batel-image_compressor:${TAG}
+                    docker tag batel-image_compressor:${TAG} 644435390668.dkr.ecr.eu-central-1.amazonaws.com/batel-image_compressor:latest
+                    docker push 644435390668.dkr.ecr.eu-central-1.amazonaws.com/batel-image_compressor:latest
                     '''
                 }
+                
             }
         }
         stage('E2E Tests') {
