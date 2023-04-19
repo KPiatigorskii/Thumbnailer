@@ -17,18 +17,19 @@ pipeline {
             steps {
                 dir("app"){
                     withMaven{
+ 
+                        //sh 'mvn package'
+                        //sh "mvn install"
+                        //sh "mvn org.codehaus.mojo:versions-maven-plugin:2.8.1:display-version -q -DforceStdout -m 'Tagging release `mvn org.codehaus.mojo:versions-maven-plugin:2.8.1:display-version -q -DforceStdout`"
+                        // sh "git tag -a 'successful build' && git push --tags"
+
+                    }
                         script{
                             def pomXml = readMavenPom file: 'pom.xml'
                             echo "pomXml: $pomXml"
                             nextVersion = pomXml.version
                             echo "${nextVersion}"
                         }
-                        sh 'mvn package'
-                        sh "mvn install"
-                        //sh "mvn org.codehaus.mojo:versions-maven-plugin:2.8.1:display-version -q -DforceStdout -m 'Tagging release `mvn org.codehaus.mojo:versions-maven-plugin:2.8.1:display-version -q -DforceStdout`"
-                        // sh "git tag -a 'successful build' && git push --tags"
-
-                    }
                 }
             }
         }
