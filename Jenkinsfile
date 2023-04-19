@@ -55,7 +55,7 @@ pipeline {
                 
                 dir("app"){
                     sh "mvn test"
-                    junit 'target/surefire-reports/*.xml'
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
                 }
             }
         }
