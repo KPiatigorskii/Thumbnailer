@@ -31,6 +31,7 @@ pipeline {
         stage('Add tag'){
             steps{
                 dir("app"){
+                    checkout scm
                     script{
                         def pomXml = readMavenPom file: 'pom.xml'
                         echo "pomXml: $pomXml"
